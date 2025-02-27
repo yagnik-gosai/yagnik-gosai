@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Variables
+BACKUP_DIR="/var/www/html/backups"
+DB_USER="master"
+DB_PASS="D7TLmgkyt3GpQYfQ1K4d"
+DB_NAME="prod_participaction"
+CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
+FILES_BACKUP="${BACKUP_DIR}/prod_participaction${CURRENT_DATE}.tar.gz"
+DB_BACKUP="prod_db_${CURRENT_DATE}.sql"
+#DB_BACKUP="${BACKUP_DIR}/wordpress_db_${CURRENT_DATE}.sql"
+WP_DIR="/var/www/html/participaction.com/wp-content"
+dbhost = "rds-end-client"
+dbUser="master"
+dbPassword="D7TLmgkyt3GpQYfQ1K4d"
+wordpressDatabase="prod_participaction"
+
+# Ensure the backup directory exists
+mkdir -p $BACKUP_DIR
+
+# Export the database
+echo "Exporting WordPress database..."
+cd $WP_DIR
+#wp db export "$DB_BACKUP" --allow-root
+mysqldump -h "${dbhost}" -u "${dbUser}" -p"${dbPassword}" "${wordpressDatabase}" > "${DB_BACKUP}"
+if [ $? -eq 0 ]; then
+    echo "Database exported successfully to $DB_BACKUP"
+else
+    echo "Failed to export the database!"
+    exit 1
+fi
+
+#cd $WP_DIR 
+
+# Compress plugins and themes
+echo "Backing up WordPress plugins and themes..."
+sudo tar -czf $FILES_BACKUP $DB_BACKUP plugins themes languages
+if [ $? -eq 0 ]; then
+    echo "Plugins and themes backed up successfully to $FILES_BACKUP"
+else
+    echo "Failed to backup the plugins and themes!"
+    exit 1
+fi
+
+echo "Zip completed"
+sleep 2
+       echo "remove sql file"
+       sudo rm -rf "$DB_BACKUP"
+       sleep 2
+       echo "Backup uploading on aws s3"
+       sudo aws s3 cp $FILES_BACKUP s3://participaction-autobackup-updraft
+       echo "Backup uploading done on s3"
+       sleep 2
+       echo "Removing backup file..."
+       sleep 2
+       sudo rm -rf "$FILES_BACKUP"
+       echo -e "\033[92mYour Participaction Backup Done:$FILES_BACKUP\033[0m"
