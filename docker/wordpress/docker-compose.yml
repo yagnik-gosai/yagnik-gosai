@@ -1,1 +1,39 @@
+FROM wordpress:6.3-php8.2-fpm
+RUN apt-get update && apt-get install -y \
+    mariadb-client
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql
 
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* 
+COPY wp-cli.phar /usr/local/bin/wp
+[ec2-user@sitepreviews WordPress]$ cat docker-compose.yml 
+networks:
+  sitepreviews-overlay:
+    external: true
+    driver: overlay
+    attachable: true
+
+services:
+  containername:
+    image: wordpress:6.7.1-php8.3-fpm-alpine
+    container_name: containername
+    restart: always
+    ports:
+      - "porthere:9000"
+    volumes:
+      - ./htdocs:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      - sitepreviews-overlay
+    environment:
+      WORDPRESS_DB_HOST: devser-rds.e2m.aws
+      WORDPRESS_DB_USER: username_here
+      WORDPRESS_DB_PASSWORD: password_here
+      WORDPRESS_DB_NAME: database_name_here
+      WP_HOME: https://domainhere
+      WP_SITEURL: https://domainhere
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0" 
+          memory: "512M"
