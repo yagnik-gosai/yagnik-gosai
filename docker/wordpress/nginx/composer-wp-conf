@@ -1,0 +1,42 @@
+server {
+        listen 80;
+        server_name yagnik.com;
+        #include /etc/nginx/includes/common.conf;
+        error_log /data/logs/nginx/yagnik;
+
+        root /data/sites/yagnik/web;
+
+
+        location /pull/ {
+                proxy_set_header Host $host;
+                proxy_pass http://localhost:8880/yagnik/git-update.php;
+                proxy_redirect off;
+        }
+ 
+        location ^~ /.well-known/ {
+            allow all;
+            root /data/sites/yagnik/web;
+            default_type text/html;
+         }
+
+        index index.php index.html;
+        
+        location / {
+            try_files $uri $uri/ /index.php?$args;
+#            auth_basic           "Development Area";
+#            auth_basic_user_file /etc/nginx/includes/.htpass-download;
+        }
+
+        location ~ \.php$ {
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                fastcgi_pass localhost:9002;
+                include fastcgi_params;
+                fastcgi_param modHeadersAvailable true;
+                fastcgi_param front_controller_active true;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_param PATH_INFO $fastcgi_path_info;
+                fastcgi_intercept_errors on;
+                fastcgi_request_buffering off;
+                root /var/www/html/web;
+        }
+        }
