@@ -1,0 +1,31 @@
+networks:
+  sitepreviews-overlay:
+    external: true
+    driver: overlay
+    attachable: true
+
+services:
+  logs:
+    image: wordpress:6.7.1-php8.3-fpm-alpine
+    container_name: logs
+    restart: always
+    ports:
+      - "9654:9000"
+    volumes:
+      - ./htdocs:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - sitepreviews-overlay
+    environment:
+      WORDPRESS_DB_HOST: devser-rds.e2m.aws
+      WORDPRESS_DB_USER: dev_logs
+      WORDPRESS_DB_PASSWORD: 84b586437cf986a9e96c9a968caf0c0e5ace
+      WORDPRESS_DB_NAME: dev_logs
+      WP_HOME: https://logs.sitepreviews.dev
+      WP_SITEURL: https://logs.sitepreviews.dev
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0" 
+          memory: "512M"
