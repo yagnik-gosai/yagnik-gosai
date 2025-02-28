@@ -1,0 +1,16 @@
+server {
+    listen 80;
+    server_name sonarqube.demo.com;
+    error_log /var/log/nginx/sonarqube_error.log;
+
+    location / {
+        # Add authentication directives
+        #auth_basic "Restricted Area";
+        #auth_basic_user_file /etc/nginx/includes/.htpass-download; 
+        proxy_pass http://localhost:9483;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
