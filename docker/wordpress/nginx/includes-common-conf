@@ -1,0 +1,81 @@
+access_log off;
+add_header X-Robots-Tag "noindex, nofollow" always;
+add_header Content-Security-Policy upgrade-insecure-requests;
+location = /xmlrpc.php {
+    deny all;
+    return 403;
+}
+
+#location ~* \.zip$ {
+#        deny all;
+#        return 403;
+#}
+
+location ~* \.sql$ {
+        deny all;
+        return 403;
+}
+
+#location ~* \.tar$ {
+#        deny all;
+#        return 403;
+#}
+
+#location ~* \.gz$ {
+#        deny all;
+#        return 403;
+#}
+
+location = /robots.txt {
+                allow all;
+                log_not_found off;
+                access_log off;
+}
+
+if ($request_method !~ ^(GET|HEAD|OPTIONS|POST)$ ) { return 405; }
+
+location  /. { return 404; }
+
+location =/git-update.php { return 404; }
+
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_types
+application/atom+xml
+application/javascript
+application/json
+application/ld+json
+application/manifest+json
+application/rss+xml
+application/vnd.geo+json
+application/vnd.ms-fontobject
+application/x-font-ttf
+application/x-web-app-manifest+json
+application/xhtml+xml
+application/xml
+font/opentype
+image/bmp
+image/svg+xml
+image/x-icon
+text/cache-manifest
+text/css
+text/plain
+text/vcard
+text/vnd.rim.location.xloc
+text/vtt
+text/x-component
+text/x-cross-domain-policy;
+gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+
+location ~* .(ogg|ogv|eot|otf|woff|webp|mp4|ttf|css|rss|atom|js|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
+            expires 365d;
+            add_header Cache-Control "public, max-age=31536000";
+           log_not_found off;
+            access_log off;
+}
+
+location ~* /(?:uploads|files)/.*\.php$ {
+            deny all;
+}
