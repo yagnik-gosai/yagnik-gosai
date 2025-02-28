@@ -7,6 +7,6 @@ To view docker logs using web URL.
 chmod 777 for /var/run/docker.sock
 ```
 
-- up the container using name logs.demo.com and add php code for get container logs.
+- up the container using name logs.demo.com and add php code(availabe on index.php) for get container logs.
 - setup nginx configuration.
 - To see container logs just run https://logs.example.com/?container=<CONTAINER_NAME>
